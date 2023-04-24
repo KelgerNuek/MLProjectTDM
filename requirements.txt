@@ -6,4 +6,5 @@ catboost
 scikit-learn
 dill
 daal==2021.4.0
+xgboost
 #-e .
