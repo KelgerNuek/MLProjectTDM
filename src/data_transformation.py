@@ -17,7 +17,7 @@ from src.utils import save_object
 
 @dataclass
 class DataTransformationConfig:
-    preprocessor_ob_file_path=os.path.join('artifacts',"preprocessor.pkl")
+    preprocessor_obj_file_path=os.path.join('artifacts',"preprocessor.pkl")
 
 class DataTransformation:
     def __init__(self):
@@ -28,7 +28,7 @@ class DataTransformation:
             numerical_columns=["writing_score","reading_score"]
             categorical_columns=[
                 "gender",
-                "race_ethinicity",
+                "race_ethnicity",
                 "parental_level_of_education",
                 "lunch",
                 "test_preparation_course",
@@ -43,17 +43,17 @@ class DataTransformation:
         
             cat_pipeline=Pipeline(
                 steps=[
-                ("imputer",SimpleImputer(strategy="most_fequent")),
+                ("imputer",SimpleImputer(strategy="most_frequent")),
                 ("one_hot_encoder",OneHotEncoder()),
-                ("scaler",StandardScaler())
+                ("scaler",StandardScaler(with_mean=False))
                 ]
                 )
-            logging.info("Numerical Columns standard scalingcompleted")
+            logging.info("Numerical Columns standard scaling completed")
             logging.info("Categorical Columns encoding completed")
 
             preprocessor=ColumnTransformer(
                 [
-                ("num_pipeline",num_pipeline,numerical_columns)
+                ("num_pipeline",num_pipeline,numerical_columns),
                 ("cat_pipeline",cat_pipeline,categorical_columns)
                 ]
                 )
@@ -90,7 +90,7 @@ class DataTransformation:
             )
 
             input_feature_train_array=preprocessing_obj.fit_transform(input_feature_train_df)
-            input_feature_test_array=preprocessing_obj.transform(input_feature_train_df)
+            input_feature_test_array=preprocessing_obj.transform(input_feature_test_df)
 
             train_arr=np.c_[
                 input_feature_train_array,np.array(target_feature_train_df)
@@ -103,15 +103,16 @@ class DataTransformation:
 
             save_object(
 
-                file_path=self.data_transformation_config.preprocessor_ob_file_path,
+                file_path=self.data_transformation_config.preprocessor_obj_file_path,
                 obj=preprocessing_obj
             )
 
             return(
                 train_arr,
                 test_arr,
-                self.data_transformation_config.preprocessor_ob_file_path,
+                self.data_transformation_config.preprocessor_obj_file_path,
             )
 
-        except:
-            pass
+        except Exception as e:
+
+            raise CustomException(e,sys)
